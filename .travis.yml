@@ -1,0 +1,40 @@
+language: julia
+os:
+  - linux
+julia:
+  - 0.7
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=true
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="BinaryProvider", url="https://github.com/JuliaPackaging/BinaryProvider.jl"))'
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="BinaryBuilder", url="https://github.com/JuliaPackaging/BinaryBuilder.jl")); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+
+deploy:
+    provider: releases
+    api_key:
+        # Note; this api_key is only valid for juan-pablo-vielma/CoinUtilsBuilder; you need
+        # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+        secure: PANvGY2AheLPrM7UbjVCY4jIMSb83Ki97qX/L/O8WI3NBaesXGq5Ha+6244NtE2fxYbbIFlxmWcmNE++HzEV+qn10/2JjzVssmRj5a2M8JFxBAADnFXOAJOFhf0Xpqrx4JAYcqUU0vznxjk7hDKstZ2E2+4OYn94qb4ol5B7XMBtNWpKGEBGUjBiP4haAkJDFL27UnD9+fmPJ2i0l0FeUN29LIu4Av8QXlZUbrO8r261J6575Eda8aBIQcyRT19xj/J1whoeZolhvNGdOhsXrRBbMt+VxQCp/IofGEehQN028JnknS/Mb2qyS8jZxJsbrHqkEAWfbC6XpTyYo9SeDUImLbMzR74DI2RxTXlT+cfgzMb69zAXECm/jQLpq+vf42jR1JdwY0vn+iR38Hc3R/zOUSRaZ/S3++u4MRsALyhdyWJgt3uWfeuiUnJV48arko8ndOHf/LzV0mvGRDj+Uf7XqC/Lgz7OshKhtNWeFrsEqJjbDMiyYxxIQuPUZFyLryF8ux13Ucmcni7hUP+ppPaA67fNBGsM1kWcoJjLPAAYsOTrDKBTMi35B9qY/d+zbnSl38y/G6Rv3fIZJEXx4gsZsAEWQ3RIrdimE23HRlVbLkfx9DFi1ClP9em3c7rz+ESjqvBOoLM0/YoxT8mC/fjvOQfs8gsw21MyitPUeKg=
+    file_glob: true
+    file: products/*
+    skip_cleanup: true
+    on:
+        repo: juan-pablo-vielma/CoinUtilsBuilder
+        tags: true
